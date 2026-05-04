@@ -31,8 +31,10 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
+        /* --- NAVBAR --- */
         .navbar {
             position: fixed;
             top: -80px;
@@ -52,6 +54,7 @@
         .nav-links { display: flex; gap: 15px; }
         .nav-item { font-weight: 600; color: #888; cursor: pointer; font-size: 0.85rem; }
 
+        /* --- HOME PAGE --- */
         #home-page { 
             flex: 1;
             display: flex;
@@ -100,6 +103,7 @@
         .icon-emoji { font-size: 3.5rem; display: block; margin-bottom: 10px; }
         .icon-label { font-size: 1.3rem; color: var(--accent); font-family: 'Cherry Bomb One', cursive; font-weight: 400; }
 
+        /* --- CONTENT CONTAINERS --- */
         .container { max-width: 1200px; margin: 0 auto; padding: 90px 15px 20px 15px; display: none; }
         .container.active { display: block; }
 
@@ -139,11 +143,99 @@
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .item-title { font-weight: 600; color: #444; font-size: 0.85rem; line-height: 1.2; }
 
+        /* --- CHARACTER PEEKER STYLES --- */
+        .character-peeker {
+            position: fixed;
+            z-index: 10000;
+            width: 100px;
+            pointer-events: auto;
+            display: none;
+            cursor: pointer;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            user-select: none;
+        }
+        .character-peeker img { width: 100%; height: auto; display: block; }
+
+        .heart-particle {
+            position: fixed; z-index: 10001; pointer-events: none;
+            font-size: 2rem; color: var(--accent); 
+            text-shadow: 0 0 8px rgba(255, 133, 161, 0.6);
+            animation: heartFloat 1.5s ease-out forwards;
+        }
+
+        @keyframes heartFloat {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.8) rotate(35deg); opacity: 0; }
+        }
+
+        @keyframes peek-bottom { 0% { transform: translateY(120px); } 15%, 85% { transform: translateY(15px); } 100% { transform: translateY(120px); } }
+        @keyframes peek-top { 0% { transform: translateY(-120px) rotate(180deg); } 15%, 85% { transform: translateY(-15px) rotate(180deg); } 100% { transform: translateY(-120px) rotate(180deg); } }
+        @keyframes peek-left { 0% { transform: translateX(-120px) rotate(90deg); } 15%, 85% { transform: translateX(-15px) rotate(90deg); } 100% { transform: translateX(-120px) rotate(90deg); } }
+        @keyframes peek-right { 0% { transform: translateX(120px) rotate(-90deg); } 15%, 85% { transform: translateX(15px) rotate(-90deg); } 100% { transform: translateX(120px) rotate(-90deg); } }
+
+        /* --- THE FLOATING ENVELOPE --- */
+        .floating-envelope {
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px;
+            font-size: 2.8rem; 
+            cursor: pointer;
+            z-index: 9999;
+            transition: var(--transition);
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+            animation: floatAnim 3s ease-in-out infinite;
+        }
+        
+        @keyframes floatAnim {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .floating-envelope:hover { 
+            transform: scale(1.2) rotate(10deg); 
+            filter: drop-shadow(0 8px 15px var(--accent));
+        }
+
+        /* --- NOTE OVERLAY --- */
+        .note-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 20000;
+        }
+
+        .note-card {
+            background: white; padding: 35px; border-radius: 4px;
+            width: 85%; max-width: 320px; text-align: center;
+            box-shadow: 12px 12px 0px var(--accent); border: 1px solid #eee;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .card-header { 
+            color: var(--accent); 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            font-size: 0.85rem; 
+            margin-bottom: 25px; 
+        }
+
+        .note-card p { color: #444; font-size: 1.1rem; line-height: 1.6; margin-bottom: 15px; font-family: 'Georgia', serif; font-style: italic; }
+        
+        #score-display { font-size: 0.75rem; color: #ccc; text-transform: uppercase; margin-bottom: 20px; font-weight: 600; letter-spacing: 1px; }
+
+        .close-btn { 
+            background: #333; border: none; padding: 10px 22px; 
+            color: white; cursor: pointer; font-size: 0.9rem; 
+            transition: 0.2s;
+        }
+        .close-btn:hover { background: var(--accent); }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
+<!-- NAVBAR -->
 <nav class="navbar" id="main-nav">
     <div class="nav-logo" onclick="showHome()">Dreamfolio</div>
     <div class="nav-links">
@@ -152,6 +244,7 @@
     </div>
 </nav>
 
+<!-- HOME -->
 <main id="home-page">
     <h1 class="home-title">Dreamfolio</h1>
     <div class="icon-grid">
@@ -167,6 +260,7 @@
     <p class="home-subtitle">Aqsa's Pocket Pinterest</p>
 </main>
 
+<!-- CONTENT -->
 <div class="container" id="section-container">
     <section id="dynamic-content">
         <div class="sticky-filters">
@@ -176,24 +270,42 @@
     </section>
 </div>
 
+<!-- INTERACTIVE TEDDY -->
+<div id="peeker" class="character-peeker" onclick="catchTeddy(event)">
+    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Bear.png" alt="teddy">
+</div>
+
+<!-- FLOATING ENVELOPE -->
+<div id="note-icon" class="floating-envelope" onclick="openNote()">
+    <span>✉️</span>
+</div>
+
+<!-- NOTE OVERLAY -->
+<div id="note-overlay" class="note-overlay" onclick="closeNote()">
+    <div class="note-card" onclick="event.stopPropagation()">
+        <div class="card-header">✉️ Pookie Reminder...</div>
+        <p id="note-content"></p>
+        <div id="score-display"></div>
+        <button class="close-btn" onclick="closeNote()">Thanks!</button>
+    </div>
+</div>
+
 <script>
     const TMDB_KEY = 'e3c3686e5a9306f584a69824326db981';
     const SHEET_ID = '1f_PUv6_kAfHFaCMuEcki4tQwRYwmFLjqr-UQk_Ov9FA';
     let diyData = []; 
 
+    /* --- NAV LOGIC --- */
     window.onpopstate = function() { showHome(false); };
-
     function openSection(id) {
         history.pushState({page: id}, id, "");
         document.getElementById('home-page').style.display = 'none';
         document.getElementById('main-nav').classList.add('visible');
         document.getElementById('section-container').classList.add('active');
-        
         if(id === 'watch') setupWatchlist();
         if(id === 'diy') setupDIY();
         window.scrollTo(0,0);
     }
-
     function showHome(updateHistory = true) {
         document.getElementById('home-page').style.display = 'flex';
         document.getElementById('main-nav').classList.remove('visible');
@@ -202,6 +314,7 @@
         window.scrollTo(0,0);
     }
 
+    /* --- DIY LOGIC --- */
     async function setupDIY() {
         const filterContainer = document.getElementById('filter-container');
         const grid = document.getElementById('content-grid');
@@ -235,6 +348,7 @@
         `).join('');
     }
 
+    /* --- WATCHLIST LOGIC --- */
     function setupWatchlist() {
         const filterContainer = document.getElementById('filter-container');
         const genres = [
@@ -275,100 +389,22 @@
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
-</script>
-<!-- ==========================================
-     THE INTERACTIVE 3D TEDDY & PINK HEART BURST
-     ========================================== -->
 
-<div id="peeker" class="character-peeker" onclick="catchTeddy(event)">
-    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Bear.png" id="peeker-img" alt="teddy bear">
-</div>
-
-<style>
-    /* 1. Teddy Container Styling */
-    .character-peeker {
-        position: fixed;
-        z-index: 10000;
-        width: 100px;
-        pointer-events: auto;
-        display: none;
-        cursor: pointer;
-        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .character-peeker img {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    /* 2. Guaranteed Pink Heart Styling */
-    .heart-particle {
-        position: fixed;
-        z-index: 10001;
-        pointer-events: none;
-        font-size: 2rem;
-        user-select: none;
-        /* Using a CSS color ensures it looks pink on all devices */
-        color: #ff85a1; 
-        text-shadow: 0 0 8px rgba(255, 133, 161, 0.6);
-        animation: heartFloat 1.5s ease-out forwards;
-    }
-
-    @keyframes heartFloat {
-        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(-120px) scale(1.8) rotate(35deg); opacity: 0; }
-    }
-
-    /* 3. Peeking Animations (3 Seconds Total) */
-    @keyframes peek-bottom {
-        0% { transform: translateY(120px); }
-        15% { transform: translateY(15px); }
-        85% { transform: translateY(15px); }
-        100% { transform: translateY(120px); }
-    }
-    @keyframes peek-top {
-        0% { transform: translateY(-120px) rotate(180deg); }
-        15% { transform: translateY(-15px) rotate(180deg); }
-        85% { transform: translateY(-15px) rotate(180deg); }
-        100% { transform: translateY(-120px) rotate(180deg); }
-    }
-    @keyframes peek-left {
-        0% { transform: translateX(-120px) rotate(90deg); }
-        15% { transform: translateX(-15px) rotate(90deg); }
-        85% { transform: translateX(-15px) rotate(90deg); }
-        100% { transform: translateX(-120px) rotate(90deg); }
-    }
-    @keyframes peek-right {
-        0% { transform: translateX(120px) rotate(-90deg); }
-        15% { transform: translateX(15px) rotate(-90deg); }
-        85% { transform: translateX(15px) rotate(-90deg); }
-        100% { transform: translateX(120px) rotate(-90deg); }
-    }
-</style>
-
-<script>
+    /* --- TEDDY GAME --- */
     let isCatching = false;
-
-    // Triggered when she taps the Teddy
     function catchTeddy(e) {
         if (isCatching) return;
         isCatching = true;
+        let currentScore = localStorage.getItem('teddyScore') || 0;
+        currentScore = parseInt(currentScore) + 1;
+        localStorage.setItem('teddyScore', currentScore);
 
         const peeker = document.getElementById('peeker');
-        
-        // Support for both mouse clicks and touch taps
         const x = e.clientX || (e.touches && e.touches[0].clientX);
         const y = e.clientY || (e.touches && e.touches[0].clientY);
 
-        // Explode into 6 pink hearts
-        for (let i = 0; i < 6; i++) {
-            createHeart(x, y);
-        }
+        for (let i = 0; i < 6; i++) { createHeart(x, y); }
 
-        // Teddy "pops" away
         peeker.style.transition = "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
         peeker.style.opacity = "0";
         peeker.style.transform += " scale(1.6)";
@@ -381,161 +417,43 @@
         }, 400);
     }
 
-    // Creates the pink heart particle
     function createHeart(x, y) {
         const heart = document.createElement('div');
         heart.className = 'heart-particle';
-        heart.innerHTML = '❤'; // Standard heart symbol colored via CSS
-        
+        heart.innerHTML = '❤';
         const offsetX = (Math.random() - 0.5) * 120;
         const offsetY = (Math.random() - 0.5) * 60;
-        
         heart.style.left = (x + offsetX) + 'px';
         heart.style.top = (y + offsetY) + 'px';
-        heart.style.animationDuration = (Math.random() * 0.5 + 1) + 's';
-
         document.body.appendChild(heart);
         setTimeout(() => heart.remove(), 1500);
     }
 
-    // Logic to make him peek from random edges
     function triggerTeddyPeek() {
         if (isCatching) return;
-        
         const peeker = document.getElementById('peeker');
         peeker.style.display = "block";
         peeker.style.top = "auto"; peeker.style.bottom = "auto";
         peeker.style.left = "auto"; peeker.style.right = "auto";
-        
         const edges = ['top', 'bottom', 'left', 'right'];
         const edge = edges[Math.floor(Math.random() * edges.length)];
         const pos = Math.floor(Math.random() * 60) + 20;
 
-        if (edge === 'bottom') {
-            peeker.style.bottom = "0"; peeker.style.left = pos + "%";
-            peeker.style.animation = "peek-bottom 3s ease-in-out forwards";
-        } else if (edge === 'top') {
-            peeker.style.top = "0"; peeker.style.left = pos + "%";
-            peeker.style.animation = "peek-top 3s ease-in-out forwards";
-        } else if (edge === 'left') {
-            peeker.style.left = "0"; peeker.style.top = pos + "%";
-            peeker.style.animation = "peek-left 3s ease-in-out forwards";
-        } else {
-            peeker.style.right = "0"; peeker.style.top = pos + "%";
-            peeker.style.animation = "peek-right 3s ease-in-out forwards";
-        }
+        if (edge === 'bottom') { peeker.style.bottom = "0"; peeker.style.left = pos + "%"; peeker.style.animation = "peek-bottom 3s ease-in-out forwards"; }
+        else if (edge === 'top') { peeker.style.top = "0"; peeker.style.left = pos + "%"; peeker.style.animation = "peek-top 3s ease-in-out forwards"; }
+        else if (edge === 'left') { peeker.style.left = "0"; peeker.style.top = pos + "%"; peeker.style.animation = "peek-left 3s ease-in-out forwards"; }
+        else { peeker.style.right = "0"; peeker.style.top = pos + "%"; peeker.style.animation = "peek-right 3s ease-in-out forwards"; }
 
-        setTimeout(() => { 
-            if (!isCatching) peeker.style.display = "none"; 
-        }, 3100);
+        setTimeout(() => { if (!isCatching) peeker.style.display = "none"; }, 3100);
     }
 
     function schedulePeeks() {
-        const randomDelay = Math.floor(Math.random() * 20000) + 20000;
-        setTimeout(() => {
-            triggerTeddyPeek();
-            schedulePeeks();
-        }, randomDelay);
+        setTimeout(() => { triggerTeddyPeek(); schedulePeeks(); }, Math.floor(Math.random() * 20000) + 20000);
     }
-
-    // Start his journey
     setTimeout(triggerTeddyPeek, 6000);
     schedulePeeks();
-</script>
-<!-- THE MOOD BOOSTER PIN -->
-<div id="note-icon" class="floating-pin" onclick="openNote()">
-    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Pushpin.png" alt="pin">
-</div>
 
-<!-- THE NOTE OVERLAY -->
-<div id="note-overlay" class="note-overlay" onclick="closeNote()">
-    <div class="note-card" onclick="event.stopPropagation()">
-        <div class="card-header">📌 A Little Reminder...</div>
-        <p id="note-content">Click the pin to get a note!</p>
-        <button class="close-btn" onclick="closeNote()">Thanks!</button>
-    </div>
-</div>
-
-<style>
-    /* 1. The 3D Push-Pin Icon */
-    .floating-pin {
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        width: 60px;
-        height: 60px;
-        cursor: pointer;
-        z-index: 9999;
-        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .floating-pin img {
-        width: 100%;
-        height: auto;
-    }
-
-    .floating-pin:hover {
-        transform: scale(1.1) rotate(-10deg);
-    }
-
-    /* 2. Minimalist Overlay */
-    .note-overlay {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.2); /* Dimmer look to focus on the card */
-        backdrop-filter: blur(4px);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 20000;
-    }
-
-    /* 3. The DIY Minimalist Card */
-    .note-card {
-        background: white;
-        padding: 30px;
-        border-radius: 4px; /* Squarer look like a scrap of paper */
-        width: 85%;
-        max-width: 320px;
-        text-align: center;
-        box-shadow: 10px 10px 0px #ffc2ca; /* Aesthetic block shadow */
-        border: 1px solid #eee;
-    }
-
-    .card-header {
-        color: #ff85a1;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.8rem;
-        margin-bottom: 20px;
-    }
-
-    .note-card p {
-        color: #444;
-        font-size: 1.05rem;
-        line-height: 1.6;
-        margin-bottom: 25px;
-        font-family: 'Georgia', serif; /* Makes it feel like a real note */
-    }
-
-    .close-btn {
-        background: #333;
-        border: none;
-        padding: 8px 18px;
-        color: white;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: opacity 0.2s;
-    }
-
-    .close-btn:hover {
-        opacity: 0.8;
-    }
-</style>
-
-<script>
+    /* --- POOKIE REMINDERS --- */
     const myNotes = [
         "Standard reminder that I’m definitely the favorite cousin. It’s not a competition, but I’m winning.",
         "You’re doing great, even on the days you feel like a potato.",
@@ -551,15 +469,15 @@
     function openNote() {
         const overlay = document.getElementById('note-overlay');
         const content = document.getElementById('note-content');
-        const randomNote = myNotes[Math.floor(Math.random() * myNotes.length)];
-        
-        content.innerText = randomNote;
+        const scoreBox = document.getElementById('score-display');
+        content.innerText = myNotes[Math.floor(Math.random() * myNotes.length)];
+        const score = localStorage.getItem('teddyScore') || 0;
+        scoreBox.innerText = `Teddies Caught: ${score}`;
         overlay.style.display = 'flex';
     }
 
-    function closeNote() {
-        document.getElementById('note-overlay').style.display = 'none';
-    }
+    function closeNote() { document.getElementById('note-overlay').style.display = 'none'; }
 </script>
+
 </body>
 </html>
