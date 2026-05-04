@@ -22,7 +22,7 @@
         ::-webkit-scrollbar-track { background: var(--pink-soft); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; border: 2px solid var(--pink-soft); }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--pink-soft); 
@@ -73,15 +73,15 @@
         }
 
         .home-subtitle {
-        margin-top: 40px;
-        font-family: 'Dancing Script', cursive; /* Beautiful Cursive */
-        font-weight: 800; /* Extra Thick */
-        color: white;
-        font-size: 1.8rem; /* Made it a bit bigger to show off the curves */
-        letter-spacing: 1px;
-        text-shadow: 2px 2px 4px var(--accent); /* Slightly deeper shadow for depth */
-        animation: fadeIn 1.2s ease;
-    }
+            margin-top: 40px;
+            font-family: 'Dancing Script', cursive;
+            font-weight: 800;
+            color: white;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px var(--accent);
+            animation: fadeIn 1.2s ease;
+        }
 
         .icon-grid {
             display: grid;
@@ -144,6 +144,9 @@
 </head>
 <body>
 
+<!-- THE AUDIO ELEMENT -->
+<audio id="pop-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
+
 <nav class="navbar" id="main-nav">
     <div class="nav-logo" onclick="showHome()">Dreamfolio</div>
     <div class="nav-links">
@@ -181,9 +184,18 @@
     const SHEET_ID = '1f_PUv6_kAfHFaCMuEcki4tQwRYwmFLjqr-UQk_Ov9FA';
     let diyData = []; 
 
+    // SOUND FUNCTION
+    function playPop() {
+        const sound = document.getElementById('pop-sound');
+        sound.currentTime = 0;
+        sound.volume = 0.4;
+        sound.play().catch(e => console.log("User must interact first"));
+    }
+
     window.onpopstate = function() { showHome(false); };
 
     function openSection(id) {
+        playPop(); // Play sound on menu click
         history.pushState({page: id}, id, "");
         document.getElementById('home-page').style.display = 'none';
         document.getElementById('main-nav').classList.add('visible');
@@ -195,6 +207,7 @@
     }
 
     function showHome(updateHistory = true) {
+        playPop(); // Play sound on logo click
         document.getElementById('home-page').style.display = 'flex';
         document.getElementById('main-nav').classList.remove('visible');
         document.getElementById('section-container').classList.remove('active');
@@ -217,8 +230,8 @@
                 img: r.c[2]?.v || ""
             }));
             const categories = [...new Set(diyData.map(item => item.category))];
-            filterContainer.innerHTML = `<button class="filter-btn active" onclick="filterDIY('All', this)">All</button>` + 
-                categories.map((cat) => `<button class="filter-btn" onclick="filterDIY('${cat}', this)">${cat}</button>`).join('');
+            filterContainer.innerHTML = `<button class="filter-btn active" onclick="playPop(); filterDIY('All', this)">All</button>` + 
+                categories.map((cat) => `<button class="filter-btn" onclick="playPop(); filterDIY('${cat}', this)">${cat}</button>`).join('');
             filterDIY('All', filterContainer.querySelector('.filter-btn'));
         } catch (e) { grid.innerHTML = "<center>Check Sheet 🎀</center>"; }
     }
@@ -228,7 +241,7 @@
         const grid = document.getElementById('content-grid');
         const filtered = category === 'All' ? diyData : diyData.filter(item => item.category === category);
         grid.innerHTML = filtered.map(item => `
-            <div class="item-card">
+            <div class="item-card" onclick="playPop()">
                 <div class="img-container"><img src="${item.img}" loading="lazy"></div>
                 <div class="item-title">${item.title}</div>
             </div>
@@ -245,7 +258,7 @@
             { name: 'K-Drama', id: 'kdrama' }
         ];
         filterContainer.innerHTML = genres.map((g, index) => `
-            <button class="filter-btn ${index === 0 ? 'active' : ''}" onclick="loadMovies('${g.id}', this)">${g.name}</button>
+            <button class="filter-btn ${index === 0 ? 'active' : ''}" onclick="playPop(); loadMovies('${g.id}', this)">${g.name}</button>
         `).join('');
         loadMovies('popular', filterContainer.querySelector('.filter-btn'));
     }
@@ -262,7 +275,7 @@
         const res = await fetch(url);
         const data = await res.json();
         grid.innerHTML = data.results.map(m => `
-            <div class="item-card">
+            <div class="item-card" onclick="playPop()">
                 <div class="img-container">
                     <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" loading="lazy">
                 </div>
