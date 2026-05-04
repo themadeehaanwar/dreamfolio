@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dreamfolio 🎀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Quicksand:wght@400;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-soft: #ffdde1;
+            --accent: #ff85a1;
+            --shadow: rgba(255, 133, 161, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Quicksand', sans-serif; }
+        body { background-color: var(--pink-soft); background-image: radial-gradient(#fff 2px, transparent 2px); background-size: 30px 30px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        header { text-align: center; padding: 40px 0; }
+        h1 { font-family: 'Cherry Bomb One', cursive; font-size: 3.5rem; color: white; text-shadow: 3px 3px 0px var(--accent); margin-bottom: 20px; }
+
+        .btn-ui { background: white; border: none; padding: 10px 25px; border-radius: 50px; cursor: pointer; color: var(--accent); font-weight: 400; box-shadow: 0 4px 10px var(--shadow); transition: var(--transition); margin-bottom: 20px; display: none; }
+
+        /* Home Icons */
+        #home-page { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+        .icon-card { background: white; border-radius: 40px; padding: 40px 20px; text-align: center; cursor: pointer; border: 8px solid white; box-shadow: 0 15px 30px var(--shadow); transition: var(--transition); }
+        .icon-card:hover { transform: translateY(-5px); }
+        .icon-emoji { font-size: 4rem; display: block; margin-bottom: 10px; }
+        .icon-label { font-size: 1.5rem; color: var(--accent); font-weight: 400; font-family: 'Cherry Bomb One', cursive; }
+
+        /* Sections & Grid */
+        .section { display: none; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        .filters { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .filter-btn { background: white; border: none; padding: 8px 18px; border-radius: 50px; cursor: pointer; color: var(--accent); font-weight: 400; box-shadow: 0 4px 8px var(--shadow); }
+        .filter-btn.active { background: var(--accent); color: white; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .item-card { background: white; border-radius: 25px; padding: 15px; border: 4px solid white; box-shadow: 0 8px 15px var(--shadow); text-align: center; }
+        .img-container { width: 100%; aspect-ratio: 2/3; border-radius: 15px; overflow: hidden; margin-bottom: 12px; background: #fff0f3; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .item-title { font-weight: 600; color: #444; font-size: 1rem; margin-bottom: 5px; }
+        .hashtag { font-size: 0.75rem; color: var(--accent); font-weight: 400; background: #fff0f3; padding: 3px 10px; border-radius: 6px; display: inline-block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <button class="btn-ui" id="backBtn" onclick="showHome()">← Home</button>
+        <h1>Dreamfolio</h1>
+    </header>
+
+    <main id="home-page">
+        <div class="icon-card" onclick="openSection('art')"><span class="icon-emoji">🎨</span><span class="icon-label">Art Gallery</span></div>
+        <div class="icon-card" onclick="openSection('watch')"><span class="icon-emoji">🍿</span><span class="icon-label">Watchlist</span></div>
+        <div class="icon-card" onclick="openSection('diy')"><span class="icon-emoji">🎀</span><span class="icon-label">DIY Ideas</span></div>
+    </main>
+
+    <section id="section-watch" class="section">
+        <div class="filters">
+            <button class="filter-btn active" onclick="loadMovies('popular', this)">Trending</button>
+            <button class="filter-btn" onclick="loadMovies('10749', this)">Rom-Com</button>
+            <button class="filter-btn" onclick="loadMovies('53', this)">Thriller</button>
+            <button class="filter-btn" onclick="loadMovies('27', this)">Horror</button>
+            <!-- Proper K-Drama Query -->
+            <button class="filter-btn" onclick="loadMovies('kdrama', this)">K-Drama</button> 
+        </div>
+        <div class="grid" id="movie-grid"></div>
+    </section>
+
+    <section id="section-diy" class="section">
+        <div class="grid" id="diy-grid"></div>
+    </section>
+</div>
+
+<script>
+    const TMDB_KEY = 'e3c3686e5a9306f584a69824326db981';
+    const SHEET_ID = '1f_PUv6_kAfHFaCMuEcki4tQwRYwmFLjqr-UQk_Ov9FA';
+
+    function openSection(id) {
+        document.getElementById('home-page').style.display = 'none';
+        document.getElementById('backBtn').style.display = 'inline-block';
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`section-${id}`).classList.add('active');
+        if(id === 'watch') loadMovies('popular', document.querySelector('.filter-btn'));
+        if(id === 'diy') loadSheetData(0); 
+    }
+
+    function showHome() {
+        document.getElementById('home-page').style.display = 'grid';
+        document.getElementById('backBtn').style.display = 'none';
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    }
+
+    async function loadMovies(type, btn) {
+        updateFilterUI(btn);
+        const grid = document.getElementById('movie-grid');
+        grid.innerHTML = '✨ Finding the best K-Dramas...';
+        
+        let url;
+        if(type === 'kdrama') {
+            // Correct K-Drama Query: TV endpoint, Korean origin, sorted by popularity
+            url = `https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_KEY}&with_origin_country=KR&sort_by=popularity.desc`;
+        } else if(type === 'popular') {
+            url = `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}`;
+        } else {
+            url = `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_KEY}&with_genres=${type}`;
+        }
+
+        const res = await fetch(url);
+        const data = await res.json();
+        grid.innerHTML = data.results.map(m => `
+            <div class="item-card">
+                <div class="img-container"><img src="https://image.tmdb.org/t/p/w500${m.poster_path}"></div>
+                <div class="item-title">${m.title || m.name}</div>
+                <div class="hashtag">#${type === 'kdrama' ? 'korean_drama' : 'movie_night'}</div>
+            </div>
+        `).join('');
+    }
+
+    async function loadSheetData(gid) {
+        const grid = document.getElementById('diy-grid');
+        grid.innerHTML = '🎀 Loading DIYs...';
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}`;
+        
+        try {
+            const res = await fetch(url);
+            const text = await res.text();
+            const json = JSON.parse(text.substr(47).slice(0, -2));
+            const rows = json.table.rows;
+
+            grid.innerHTML = rows.slice(1).map(r => `
+                <div class="item-card">
+                    <div class="img-container"><img src="${r.c[2]?.v}"></div>
+                    <div class="item-title">${r.c[0]?.v}</div>
+                    <div class="hashtag">#${r.c[1]?.v || "diy"}</div>
+                </div>`).join('');
+        } catch (e) { grid.innerHTML = "<center>Check Sheet 🎀</center>"; }
+    }
+
+    function updateFilterUI(btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+</script>
+</body>
+</html>
