@@ -442,5 +442,124 @@
     setTimeout(triggerTeddyPeek, 6000);
     schedulePeeks();
 </script>
+<!-- THE MOOD BOOSTER PIN -->
+<div id="note-icon" class="floating-pin" onclick="openNote()">
+    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Pushpin.png" alt="pin">
+</div>
+
+<!-- THE NOTE OVERLAY -->
+<div id="note-overlay" class="note-overlay" onclick="closeNote()">
+    <div class="note-card" onclick="event.stopPropagation()">
+        <div class="card-header">📌 A Little Reminder...</div>
+        <p id="note-content">Click the pin to get a note!</p>
+        <button class="close-btn" onclick="closeNote()">Thanks!</button>
+    </div>
+</div>
+
+<style>
+    /* 1. The 3D Push-Pin Icon */
+    .floating-pin {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+        z-index: 9999;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .floating-pin img {
+        width: 100%;
+        height: auto;
+    }
+
+    .floating-pin:hover {
+        transform: scale(1.1) rotate(-10deg);
+    }
+
+    /* 2. Minimalist Overlay */
+    .note-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.2); /* Dimmer look to focus on the card */
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 20000;
+    }
+
+    /* 3. The DIY Minimalist Card */
+    .note-card {
+        background: white;
+        padding: 30px;
+        border-radius: 4px; /* Squarer look like a scrap of paper */
+        width: 85%;
+        max-width: 320px;
+        text-align: center;
+        box-shadow: 10px 10px 0px #ffc2ca; /* Aesthetic block shadow */
+        border: 1px solid #eee;
+    }
+
+    .card-header {
+        color: #ff85a1;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.8rem;
+        margin-bottom: 20px;
+    }
+
+    .note-card p {
+        color: #444;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        font-family: 'Georgia', serif; /* Makes it feel like a real note */
+    }
+
+    .close-btn {
+        background: #333;
+        border: none;
+        padding: 8px 18px;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: opacity 0.2s;
+    }
+
+    .close-btn:hover {
+        opacity: 0.8;
+    }
+</style>
+
+<script>
+    const myNotes = [
+        "Standard reminder that I’m definitely the favorite cousin. It’s not a competition, but I’m winning.",
+        "You’re doing great, even on the days you feel like a potato.",
+        "Keep being a menace to society. It suits you.",
+        "If you ever need to hide a body, I'm the one you call. Obviously.",
+        "Standard reminder that your sketchbook is cooler than most people’s entire personalities.",
+        "Your art is so good it makes me want to go buy supplies I’ll never use.",
+        "Your 'ruined' art is literally better than my best work. Please stop being so talented.",
+        "I’m 100% convinced you don’t know what 'bad art' actually looks like.",
+        "If we were in a horror movie, you’d definitely be the one to survive."
+    ];
+
+    function openNote() {
+        const overlay = document.getElementById('note-overlay');
+        const content = document.getElementById('note-content');
+        const randomNote = myNotes[Math.floor(Math.random() * myNotes.length)];
+        
+        content.innerText = randomNote;
+        overlay.style.display = 'flex';
+    }
+
+    function closeNote() {
+        document.getElementById('note-overlay').style.display = 'none';
+    }
+</script>
 </body>
 </html>
