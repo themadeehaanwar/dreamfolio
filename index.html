@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -32,10 +33,9 @@
             flex-direction: column;
         }
 
-        /* Navbar - Hidden by default */
         .navbar {
             position: fixed;
-            top: -80px; /* Start off-screen */
+            top: -80px;
             left: 0; width: 100%; height: 70px;
             background: white;
             display: flex; justify-content: space-between; align-items: center;
@@ -50,10 +50,8 @@
             font-size: 1.6rem; color: var(--accent); font-weight: 400; cursor: pointer;
         }
         .nav-links { display: flex; gap: 15px; }
-        .nav-item { font-weight: 600; color: #888; cursor: pointer; font-size: 0.85rem; transition: 0.3s; }
-        .nav-item:hover { color: var(--accent); }
+        .nav-item { font-weight: 600; color: #888; cursor: pointer; font-size: 0.85rem; }
 
-        /* Home Page - Pretty & Space Taking */
         #home-page { 
             flex: 1;
             display: flex;
@@ -74,6 +72,17 @@
             font-weight: 400;
         }
 
+        .home-subtitle {
+        margin-top: 40px;
+        font-family: 'Dancing Script', cursive; /* Beautiful Cursive */
+        font-weight: 800; /* Extra Thick */
+        color: white;
+        font-size: 1.8rem; /* Made it a bit bigger to show off the curves */
+        letter-spacing: 1px;
+        text-shadow: 2px 2px 4px var(--accent); /* Slightly deeper shadow for depth */
+        animation: fadeIn 1.2s ease;
+    }
+
         .icon-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -91,7 +100,6 @@
         .icon-emoji { font-size: 3.5rem; display: block; margin-bottom: 10px; }
         .icon-label { font-size: 1.3rem; color: var(--accent); font-family: 'Cherry Bomb One', cursive; font-weight: 400; }
 
-        /* Sections */
         .container { max-width: 1200px; margin: 0 auto; padding: 90px 15px 20px 15px; display: none; }
         .container.active { display: block; }
 
@@ -113,11 +121,7 @@
         }
         .filter-btn.active { background: var(--accent); color: white; }
 
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px; 
-        }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 
         @media (min-width: 768px) {
             .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
@@ -133,14 +137,13 @@
             overflow: hidden; margin-bottom: 8px; background: #fff0f3; 
         }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        .item-title { font-weight: 600; color: #444; font-size: 0.85rem; margin-bottom: 5px; line-height: 1.2; }
+        .item-title { font-weight: 600; color: #444; font-size: 0.85rem; line-height: 1.2; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<!-- Header only visible in sections -->
 <nav class="navbar" id="main-nav">
     <div class="nav-logo" onclick="showHome()">Dreamfolio</div>
     <div class="nav-links">
@@ -149,7 +152,6 @@
     </div>
 </nav>
 
-<!-- Hero Home Page -->
 <main id="home-page">
     <h1 class="home-title">Dreamfolio</h1>
     <div class="icon-grid">
@@ -162,9 +164,9 @@
             <span class="icon-label">DIY Ideas</span>
         </div>
     </div>
+    <p class="home-subtitle">Aqsa's Pocket Pinterest</p>
 </main>
 
-<!-- Content Sections -->
 <div class="container" id="section-container">
     <section id="dynamic-content">
         <div class="sticky-filters">
@@ -204,9 +206,7 @@
         const filterContainer = document.getElementById('filter-container');
         const grid = document.getElementById('content-grid');
         grid.innerHTML = '<center>🎀 Loading...</center>';
-        
         const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=0`;
-        
         try {
             const res = await fetch(url);
             const text = await res.text();
@@ -216,11 +216,9 @@
                 category: r.c[1]?.v || "Other",
                 img: r.c[2]?.v || ""
             }));
-
             const categories = [...new Set(diyData.map(item => item.category))];
             filterContainer.innerHTML = `<button class="filter-btn active" onclick="filterDIY('All', this)">All</button>` + 
                 categories.map((cat) => `<button class="filter-btn" onclick="filterDIY('${cat}', this)">${cat}</button>`).join('');
-
             filterDIY('All', filterContainer.querySelector('.filter-btn'));
         } catch (e) { grid.innerHTML = "<center>Check Sheet 🎀</center>"; }
     }
@@ -246,12 +244,9 @@
             { name: 'Horror', id: '27' },
             { name: 'K-Drama', id: 'kdrama' }
         ];
-
         filterContainer.innerHTML = genres.map((g, index) => `
-            <button class="filter-btn ${index === 0 ? 'active' : ''}" 
-                    onclick="loadMovies('${g.id}', this)">${g.name}</button>
+            <button class="filter-btn ${index === 0 ? 'active' : ''}" onclick="loadMovies('${g.id}', this)">${g.name}</button>
         `).join('');
-
         loadMovies('popular', filterContainer.querySelector('.filter-btn'));
     }
 
@@ -259,13 +254,11 @@
         updateFilterUI(btn);
         const grid = document.getElementById('content-grid');
         grid.innerHTML = '<center>✨ Loading...</center>';
-        
         let url = type === 'kdrama' 
             ? `https://api.themoviedb.org/3/discover/tv?api_key=${TMDB_KEY}&with_origin_country=KR&sort_by=popularity.desc`
             : type === 'popular' 
             ? `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_KEY}`
             : `https://api.themoviedb.org/3/discover/movie?api_key=${TMDB_KEY}&with_genres=${type}`;
-
         const res = await fetch(url);
         const data = await res.json();
         grid.innerHTML = data.results.map(m => `
