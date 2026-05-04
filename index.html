@@ -144,9 +144,6 @@
 </head>
 <body>
 
-<!-- THE AUDIO ELEMENT -->
-<audio id="pop-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
-
 <nav class="navbar" id="main-nav">
     <div class="nav-logo" onclick="showHome()">Dreamfolio</div>
     <div class="nav-links">
@@ -184,18 +181,9 @@
     const SHEET_ID = '1f_PUv6_kAfHFaCMuEcki4tQwRYwmFLjqr-UQk_Ov9FA';
     let diyData = []; 
 
-    // SOUND FUNCTION
-    function playPop() {
-        const sound = document.getElementById('pop-sound');
-        sound.currentTime = 0;
-        sound.volume = 0.4;
-        sound.play().catch(e => console.log("User must interact first"));
-    }
-
     window.onpopstate = function() { showHome(false); };
 
     function openSection(id) {
-        playPop(); // Play sound on menu click
         history.pushState({page: id}, id, "");
         document.getElementById('home-page').style.display = 'none';
         document.getElementById('main-nav').classList.add('visible');
@@ -207,7 +195,6 @@
     }
 
     function showHome(updateHistory = true) {
-        playPop(); // Play sound on logo click
         document.getElementById('home-page').style.display = 'flex';
         document.getElementById('main-nav').classList.remove('visible');
         document.getElementById('section-container').classList.remove('active');
@@ -230,8 +217,8 @@
                 img: r.c[2]?.v || ""
             }));
             const categories = [...new Set(diyData.map(item => item.category))];
-            filterContainer.innerHTML = `<button class="filter-btn active" onclick="playPop(); filterDIY('All', this)">All</button>` + 
-                categories.map((cat) => `<button class="filter-btn" onclick="playPop(); filterDIY('${cat}', this)">${cat}</button>`).join('');
+            filterContainer.innerHTML = `<button class="filter-btn active" onclick="filterDIY('All', this)">All</button>` + 
+                categories.map((cat) => `<button class="filter-btn" onclick="filterDIY('${cat}', this)">${cat}</button>`).join('');
             filterDIY('All', filterContainer.querySelector('.filter-btn'));
         } catch (e) { grid.innerHTML = "<center>Check Sheet 🎀</center>"; }
     }
@@ -241,7 +228,7 @@
         const grid = document.getElementById('content-grid');
         const filtered = category === 'All' ? diyData : diyData.filter(item => item.category === category);
         grid.innerHTML = filtered.map(item => `
-            <div class="item-card" onclick="playPop()">
+            <div class="item-card">
                 <div class="img-container"><img src="${item.img}" loading="lazy"></div>
                 <div class="item-title">${item.title}</div>
             </div>
@@ -258,7 +245,7 @@
             { name: 'K-Drama', id: 'kdrama' }
         ];
         filterContainer.innerHTML = genres.map((g, index) => `
-            <button class="filter-btn ${index === 0 ? 'active' : ''}" onclick="playPop(); loadMovies('${g.id}', this)">${g.name}</button>
+            <button class="filter-btn ${index === 0 ? 'active' : ''}" onclick="loadMovies('${g.id}', this)">${g.name}</button>
         `).join('');
         loadMovies('popular', filterContainer.querySelector('.filter-btn'));
     }
@@ -275,7 +262,7 @@
         const res = await fetch(url);
         const data = await res.json();
         grid.innerHTML = data.results.map(m => `
-            <div class="item-card" onclick="playPop()">
+            <div class="item-card">
                 <div class="img-container">
                     <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" loading="lazy">
                 </div>
@@ -288,6 +275,172 @@
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
+</script>
+<!-- ==========================================
+     THE INTERACTIVE 3D TEDDY & PINK HEART BURST
+     ========================================== -->
+
+<div id="peeker" class="character-peeker" onclick="catchTeddy(event)">
+    <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Bear.png" id="peeker-img" alt="teddy bear">
+</div>
+
+<style>
+    /* 1. Teddy Container Styling */
+    .character-peeker {
+        position: fixed;
+        z-index: 10000;
+        width: 100px;
+        pointer-events: auto;
+        display: none;
+        cursor: pointer;
+        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .character-peeker img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* 2. Guaranteed Pink Heart Styling */
+    .heart-particle {
+        position: fixed;
+        z-index: 10001;
+        pointer-events: none;
+        font-size: 2rem;
+        user-select: none;
+        /* Using a CSS color ensures it looks pink on all devices */
+        color: #ff85a1; 
+        text-shadow: 0 0 8px rgba(255, 133, 161, 0.6);
+        animation: heartFloat 1.5s ease-out forwards;
+    }
+
+    @keyframes heartFloat {
+        0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(-120px) scale(1.8) rotate(35deg); opacity: 0; }
+    }
+
+    /* 3. Peeking Animations (3 Seconds Total) */
+    @keyframes peek-bottom {
+        0% { transform: translateY(120px); }
+        15% { transform: translateY(15px); }
+        85% { transform: translateY(15px); }
+        100% { transform: translateY(120px); }
+    }
+    @keyframes peek-top {
+        0% { transform: translateY(-120px) rotate(180deg); }
+        15% { transform: translateY(-15px) rotate(180deg); }
+        85% { transform: translateY(-15px) rotate(180deg); }
+        100% { transform: translateY(-120px) rotate(180deg); }
+    }
+    @keyframes peek-left {
+        0% { transform: translateX(-120px) rotate(90deg); }
+        15% { transform: translateX(-15px) rotate(90deg); }
+        85% { transform: translateX(-15px) rotate(90deg); }
+        100% { transform: translateX(-120px) rotate(90deg); }
+    }
+    @keyframes peek-right {
+        0% { transform: translateX(120px) rotate(-90deg); }
+        15% { transform: translateX(15px) rotate(-90deg); }
+        85% { transform: translateX(15px) rotate(-90deg); }
+        100% { transform: translateX(120px) rotate(-90deg); }
+    }
+</style>
+
+<script>
+    let isCatching = false;
+
+    // Triggered when she taps the Teddy
+    function catchTeddy(e) {
+        if (isCatching) return;
+        isCatching = true;
+
+        const peeker = document.getElementById('peeker');
+        
+        // Support for both mouse clicks and touch taps
+        const x = e.clientX || (e.touches && e.touches[0].clientX);
+        const y = e.clientY || (e.touches && e.touches[0].clientY);
+
+        // Explode into 6 pink hearts
+        for (let i = 0; i < 6; i++) {
+            createHeart(x, y);
+        }
+
+        // Teddy "pops" away
+        peeker.style.transition = "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+        peeker.style.opacity = "0";
+        peeker.style.transform += " scale(1.6)";
+
+        setTimeout(() => {
+            peeker.style.display = "none";
+            peeker.style.opacity = "1";
+            peeker.style.transition = "none";
+            isCatching = false;
+        }, 400);
+    }
+
+    // Creates the pink heart particle
+    function createHeart(x, y) {
+        const heart = document.createElement('div');
+        heart.className = 'heart-particle';
+        heart.innerHTML = '❤'; // Standard heart symbol colored via CSS
+        
+        const offsetX = (Math.random() - 0.5) * 120;
+        const offsetY = (Math.random() - 0.5) * 60;
+        
+        heart.style.left = (x + offsetX) + 'px';
+        heart.style.top = (y + offsetY) + 'px';
+        heart.style.animationDuration = (Math.random() * 0.5 + 1) + 's';
+
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1500);
+    }
+
+    // Logic to make him peek from random edges
+    function triggerTeddyPeek() {
+        if (isCatching) return;
+        
+        const peeker = document.getElementById('peeker');
+        peeker.style.display = "block";
+        peeker.style.top = "auto"; peeker.style.bottom = "auto";
+        peeker.style.left = "auto"; peeker.style.right = "auto";
+        
+        const edges = ['top', 'bottom', 'left', 'right'];
+        const edge = edges[Math.floor(Math.random() * edges.length)];
+        const pos = Math.floor(Math.random() * 60) + 20;
+
+        if (edge === 'bottom') {
+            peeker.style.bottom = "0"; peeker.style.left = pos + "%";
+            peeker.style.animation = "peek-bottom 3s ease-in-out forwards";
+        } else if (edge === 'top') {
+            peeker.style.top = "0"; peeker.style.left = pos + "%";
+            peeker.style.animation = "peek-top 3s ease-in-out forwards";
+        } else if (edge === 'left') {
+            peeker.style.left = "0"; peeker.style.top = pos + "%";
+            peeker.style.animation = "peek-left 3s ease-in-out forwards";
+        } else {
+            peeker.style.right = "0"; peeker.style.top = pos + "%";
+            peeker.style.animation = "peek-right 3s ease-in-out forwards";
+        }
+
+        setTimeout(() => { 
+            if (!isCatching) peeker.style.display = "none"; 
+        }, 3100);
+    }
+
+    function schedulePeeks() {
+        const randomDelay = Math.floor(Math.random() * 20000) + 20000;
+        setTimeout(() => {
+            triggerTeddyPeek();
+            schedulePeeks();
+        }, randomDelay);
+    }
+
+    // Start his journey
+    setTimeout(triggerTeddyPeek, 6000);
+    schedulePeeks();
 </script>
 </body>
 </html>
